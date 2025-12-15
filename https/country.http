@@ -2,9 +2,6 @@
 
 @baseUrl = http://127.0.0.1:8098
 
-### Status
-GET {{baseUrl}}/
-
 ### Países
 GET {{baseUrl}}/paises
 Accept: application/json
