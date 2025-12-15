@@ -5,3 +5,21 @@
 ### Países
 GET {{baseUrl}}/paises
 Accept: application/json
+
+### Senegal 
+GET {{baseUrl}}/pais/senegal
+Accept: application/json
+
+### Mônaco
+GET {{baseUrl}}/pais/monaco/moeda
+Accept: application/json
+
+
+### Australia
+GET {{baseUrl}}/pais/australia/idioma
+Accept: application/json
+
+### Africa
+GET {{baseUrl}}/africa/independentes
+Accept: application/json
+

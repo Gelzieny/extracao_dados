@@ -10,10 +10,10 @@ app = FastAPI(
   version="1.0.0"
 )
 
-REST_COUNTRIES_URL = "https://restcountries.com/v3.1/all?fields=name,population,region,flags"
+REST_COUNTRIES_URL = "https://restcountries.com/v3.1"
 
 def fetch_dados_paises():
-  response = requests.get(REST_COUNTRIES_URL)
+  response = requests.get(f"{REST_COUNTRIES_URL}/all?fields=name,population,region,flags")
   if response.status_code == 200:
     return response.json()
   else:
@@ -36,6 +36,75 @@ def get_paises():
   resultado = agrupar_por_regiao(paises)
   return resultado
 
+@app.get("/pais/{nome}")
+def bsucar_pais(nome:str):
+  response = requests.get(f"{REST_COUNTRIES_URL}/name/{nome}")
+  if response.status_code == 200:
+    ret =  response.json()
+    country = ret[0]
+    capital = country.get("capital", [])
+
+    return {
+      "nome": country["name"]["common"],
+      "populacao": country["population"],
+      "regiao": country["region"],
+      "subregiao": country.get("subregion", "Desconhecida"),
+      "bandeira": country.get("flags", {}).get("png"),
+      "capital": capital[0] if capital else None,
+      "moeda": country.get("currencies", {}).get("XOF"),
+      "idioma": country.get("languages", {}).get('fra')
+    }
+
+  else:
+    raise HTTPException(status_code=response.status_code, detail="País não encontrado")
+
+@app.get("/pais/{nome}/moeda")
+def bsucar_moeda(nome:str):
+  response = requests.get(f"{REST_COUNTRIES_URL}/name/{nome}")
+  if response.status_code == 200:
+    ret =  response.json()
+    country = ret[0]
+
+    return {
+      "nome": country["name"]["common"],
+      "moeda": country["currencies"]
+    }
+
+  else:
+    raise HTTPException(status_code=response.status_code, detail="País não encontrado")
+
+@app.get("/pais/{nome}/idioma")
+def buscar_idioma(nome:str):
+  response = requests.get(f"{REST_COUNTRIES_URL}/name/{nome}")
+  if response.status_code == 200:
+    ret =  response.json()
+
+
+    country = ret[0]
+
+    return {
+      "nome": country["name"]["common"],
+      "idioma": country.get("languages", {})
+    }
+
+  else:
+    raise HTTPException(status_code=response.status_code, detail="País não encontrado")
+
+@app.get("/africa/independentes")
+def buscar_indepentes_africa():
+  response = requests.get(f"{REST_COUNTRIES_URL}/region/africa")
+  if response.status_code == 200:
+    paises_africa = response.json()
+
+    independentes = [
+      p["name"]["common"]
+      for p in paises_africa
+      if p.get("independent") is True
+    ]
+
+    return independentes
+  else:
+    raise HTTPException(status_code=response.status_code, detail="Erro ao buscar dados dos países")
 
 if __name__ == "__main__":
   uvicorn.run(
