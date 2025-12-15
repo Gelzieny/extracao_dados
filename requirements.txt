@@ -1,0 +1,6 @@
+fastapi
+requests
+psutil
+pyjwt
+gunicorn
+uvicorn[standard]
