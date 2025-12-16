@@ -52,3 +52,69 @@ def get_apod():
   }
 
   return treated_data
+
+
+@nasa_router.get(
+  "/{date}",
+  summary="APOD por data",
+  description="""
+Retorna a **Astronomy Picture of the Day (APOD)** da NASA para uma data específica.
+
+Formato da data:
+- `YYYY-MM-DD` (ex: `2025-12-16`)
+"""
+)
+def get_apod_by_date(date: str):
+   
+  try:
+    datetime.strptime(date, "%Y-%m-%d")
+  except ValueError:
+    raise HTTPException(
+      status_code=400,
+      detail="Formato de data inválido. Use YYYY-MM-DD"
+    )
+
+  response = requests.get(
+    NASA_APOD_URL,
+    params={
+      "api_key": NASA_API_KEY,
+      "date": date
+    },
+    timeout=10
+  )
+
+  if response.status_code == 200:
+    data = response.json()
+
+  elif response.status_code == 401:
+    raise HTTPException(
+      status_code=401,
+      detail="Chave da API inválida ou não autorizada"
+    )
+
+  elif response.status_code == 429:
+    raise HTTPException(
+      status_code=429,
+      detail="Limite de requisições excedido. Tente novamente mais tarde"
+    )
+
+  else:
+    raise HTTPException(
+      status_code=response.status_code,
+      detail="Erro inesperado ao acessar a API da NASA"
+    )
+
+  treated_data = {
+    "title": data.get("title"),
+    "date": datetime.strptime(data["date"], "%Y-%m-%d").strftime("%d/%m/%Y"),
+    "media_type": data.get("media_type"),
+    "image_url": data.get("url"),
+    "hd_image_url": data.get("hdurl"),
+    "description": data.get("explanation"),
+    "copyright": (
+      data.get("copyright", "").strip()
+      if data.get("copyright") else None
+    )
+  }
+
+  return treated_data 
