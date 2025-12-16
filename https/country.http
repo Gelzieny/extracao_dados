@@ -7,16 +7,16 @@ GET {{baseUrl}}/paises
 Accept: application/json
 
 ### Senegal 
-GET {{baseUrl}}/pais/senegal
+GET {{baseUrl}}/paises/senegal
 Accept: application/json
 
 ### Mônaco
-GET {{baseUrl}}/pais/monaco/moeda
+GET {{baseUrl}}/paises/monaco/moeda
 Accept: application/json
 
 
 ### Australia
-GET {{baseUrl}}/pais/australia/idioma
+GET {{baseUrl}}/paises/australia/idioma
 Accept: application/json
 
 ### Africa

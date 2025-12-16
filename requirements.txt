@@ -4,3 +4,4 @@ psutil
 pyjwt
 gunicorn
 uvicorn[standard]
+python-dotenv
