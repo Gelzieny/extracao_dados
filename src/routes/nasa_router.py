@@ -3,6 +3,8 @@ import requests
 from datetime import datetime
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
+from requests.exceptions import Timeout, ConnectionError, RequestException
+
 
 load_dotenv()
 
@@ -53,7 +55,6 @@ def get_apod():
 
   return treated_data
 
-
 @nasa_router.get(
   "/{date}",
   summary="APOD por data",
@@ -65,23 +66,42 @@ Formato da data:
 """
 )
 def get_apod_by_date(date: str):
-   
+
   try:
     datetime.strptime(date, "%Y-%m-%d")
   except ValueError:
     raise HTTPException(
       status_code=400,
-      detail="Formato de data inválido. Use YYYY-MM-DD"
+      detail="Formato de data inválido. Use YYYY-MM-DD (ex: 1991-06-01)"
     )
 
-  response = requests.get(
-    NASA_APOD_URL,
-    params={
-      "api_key": NASA_API_KEY,
-      "date": date
-    },
-    timeout=10
-  )
+  try:
+    response = requests.get(
+      NASA_APOD_URL,
+      params={
+        "api_key": NASA_API_KEY,
+        "date": date
+      },
+      timeout=10
+    )
+
+  except Timeout:
+    raise HTTPException(
+      status_code=504,
+      detail="Tempo de resposta da API da NASA excedido (timeout)"
+    )
+
+  except ConnectionError:
+    raise HTTPException(
+      status_code=503,
+      detail="Erro de conexão com a API da NASA"
+    )
+
+  except RequestException:
+    raise HTTPException(
+      status_code=500,
+      detail="Erro inesperado ao realizar a requisição"
+    )
 
   if response.status_code == 200:
     data = response.json()
@@ -95,7 +115,7 @@ def get_apod_by_date(date: str):
   elif response.status_code == 429:
     raise HTTPException(
       status_code=429,
-      detail="Limite de requisições excedido. Tente novamente mais tarde"
+      detail="Limite de requisições da API da NASA excedido"
     )
 
   else:
@@ -104,9 +124,11 @@ def get_apod_by_date(date: str):
       detail="Erro inesperado ao acessar a API da NASA"
     )
 
-  treated_data = {
+  return {
     "title": data.get("title"),
-    "date": datetime.strptime(data["date"], "%Y-%m-%d").strftime("%d/%m/%Y"),
+    "date": datetime.strptime(
+      data["date"], "%Y-%m-%d"
+    ).strftime("%d/%m/%Y"),
     "media_type": data.get("media_type"),
     "image_url": data.get("url"),
     "hd_image_url": data.get("hdurl"),
@@ -116,5 +138,3 @@ def get_apod_by_date(date: str):
       if data.get("copyright") else None
     )
   }
-
-  return treated_data 
