@@ -2,6 +2,8 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
+from routes.imdb_router import imdb_router
+from routes.nasa_json_router import nasa_json_router
 from routes.nasa_router import nasa_router
 from routes.paises_router import paises_router
 
@@ -12,7 +14,9 @@ app = FastAPI(
 )
 
 app.include_router(paises_router)
+app.include_router(imdb_router)
 app.include_router(nasa_router)
+app.include_router(nasa_json_router)
 
 @app.get("/", include_in_schema=False)
 def redirect_to_docs():

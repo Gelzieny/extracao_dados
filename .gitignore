@@ -205,3 +205,10 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# ======================================================
+# CSVs tratados (DEVEM subir no repositório)
+# ======================================================
+!csv_tratados/
+!csv_tratados/**

@@ -5,3 +5,5 @@ pyjwt
 gunicorn
 uvicorn[standard]
 python-dotenv
+python-multipart
+pandas
