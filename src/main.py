@@ -14,9 +14,9 @@ app = FastAPI(
 )
 
 app.include_router(paises_router)
-app.include_router(imdb_router)
 app.include_router(nasa_router)
 app.include_router(nasa_json_router)
+app.include_router(imdb_router)
 
 @app.get("/", include_in_schema=False)
 def redirect_to_docs():

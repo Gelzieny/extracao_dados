@@ -3,8 +3,8 @@ import requests
 from datetime import datetime
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import PlainTextResponse
 from requests.exceptions import Timeout, ConnectionError, RequestException
-
 
 load_dotenv()
 
@@ -12,6 +12,42 @@ NASA_API_KEY = os.getenv("NASA_API_KEY")
 NASA_APOD_URL = os.getenv("NASA_APOD_URL")
 
 nasa_router = APIRouter(prefix="/apod", tags=["Aula 02"])
+
+
+
+@nasa_router.get(
+  "/analise-endpoints-nasa",
+  response_class=PlainTextResponse,
+  summary="Mostra a análise dos endpoints da API APOD"
+)
+def analise_endpoints_nasa():
+    return """
+      Análise de cada opção
+
+      ❌ https://api.nasa.gov/planet/apod?api_key=DEMO_KEY
+      → Caminho incorreto (planet ❌, o correto é planetary)
+
+      ✅ https://api.nasa.gov/planetary/apod
+      → Endpoint correto base (sem parâmetros)
+
+      ❌ https://api.nasa.gov/planetary/apod?apikey=DEMO_KEY
+      → Nome do parâmetro incorreto (apikey ❌, o correto é api_key)
+
+      ❌ https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=10-12-2024
+      → Formato de data inválido (o correto é YYYY-MM-DD)
+
+      ❌ https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=2024-02-30
+      → Data inexistente (fevereiro não tem dia 30)
+
+      ❌ POST https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY
+      → Método HTTP incorreto (a API usa GET, não POST)
+
+      ❌ https://api.nasa.gov/planetary/apod?api_key=MINHA_CHAVE_ERRADA
+      → Chave de API inválida
+
+      ❌ https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&city=saopaulo
+      → Parâmetro inexistente (city não é aceito pela API)
+    """.strip()
 
 @nasa_router.get(
   "",
